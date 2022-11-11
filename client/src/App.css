@@ -1,0 +1,36 @@
+body {
+    background: #E8E7E7;
+}
+
+.titre1 {
+    color: #1976d2;
+    font-family: "Great Vibes", cursive;
+    font-size: 65px;
+    line-height: 60px;
+    font-weight: normal;
+    margin-bottom: 0px;
+    margin-top: 10px;
+    text-align: center;
+    text-shadow: 0 1px 1px #fff;
+}
+
+.nav-link{
+    padding: 1rem 2rem 1.15rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: #ebebeb;
+    min-width: 80px;
+    margin: auto;
+  }
+
+.nav-link:hover {
+    background-image: url('https://scottyzen.sirv.com/Images/v/button.png');
+    background-size: 100% 100%;
+    color: #27262c;
+    animation: spring 300ms ease-out;
+    text-shadow: 0 -1px 0 #ef816c;
+    font-weight: bold;
+  }
+.nav-link:active {
+    transform: translateY(4px);
+  }
