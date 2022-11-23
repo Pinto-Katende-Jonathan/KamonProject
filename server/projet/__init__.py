@@ -1,22 +1,22 @@
 from apiflask import APIFlask
 
-def create_app():
-    app = APIFlask(__name__, title="Projet Gloire Kamon")
 
-    from flask_jwt_extended import JWTManager
-    JWTManager(app)#Initialisation de jwt
+def create_app():
+    app = APIFlask(__name__, title="Projet Karl")
 
     from flask_cors import CORS
     CORS(app)
-    
-    from .client_.view import cli
-    from .facture_.view import fac
-    from .article_.view import art
-    from .user_.view import use
 
-    app.register_blueprint(cli)
-    app.register_blueprint(fac)
-    app.register_blueprint(art)
+    from .users.view import use
+    from .prestations.view import pre
+    from .cours.view import crs
+    from .enseignants.view import ens
+    #from .paiements.view import pai
+
     app.register_blueprint(use)
-    
+    app.register_blueprint(pre)
+    app.register_blueprint(crs)
+    app.register_blueprint(ens)
+    # app.register_blueprint(pai)
+
     return app

@@ -1,86 +1,23 @@
 from .extension import db
 from sqlalchemy.sql import func
-"""
-A one to many relationship places a foreign key on the child table referencing the parent. relationship() is then specified on the parent, as referencing a collection of items represented by the child
-"""
-#Article
-#------------------
-class Article(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    code = db.Column(db.String(50), nullable=False, unique=True)
-    description = db.Column(db.String(80), nullable=False)
-    image =db.Column(db.String(255), unique=True, nullable=False, default='default.jpg')
-    qty_stock = db.Column(db.Integer)
-    prix_unitaire = db.Column(db.Float)
-    
-    def to_json(self):
-        return {
-          'produit_id':self.id,
-          'code_produit':self.code,
-          'description':self.description,
-          'image_name':self.image,
-          'qty_stock':self.qty_stock,
-          'prix_unitaire':self.prix_unitaire
-        }
-
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-        
-    def remove(self):
-        db.session.delete(self)
-        db.session.commit()
-        
-    def __repr__(self):
-        return '<Produit %r>' % self.description
-
-#Client
-#------------------
-class Client(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(80), nullable=False)
-    phone =db.Column(db.String(10), unique=True, nullable=False)
-    createdAt = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    #relation with Client (Parent)
-    #client_info = db.relationship('Facture', backref='client')
-   
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-        
-    def remove(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Client %r>' % self.name
-        
-#Facture
-#------------------
-class Facture(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    createdAt = db.Column(db.Date, server_default=func.now())
-    montant = db.Column(db.Integer, default=0)
-    discount = db.Column(db.Float, default=0)
-    produits = db.Column(db.PickleType, nullable=False)#List of products with all fields in dict format
-    #relation with Client
-    status = db.Column(db.String(10), default='open', nullable=False)
-    #lien avec le client (Enfant)
-    #clientId = db.Column(db.Integer, db.ForeignKey('client.id'))
-    def __repr__(self):
-          return '<Facture %r>' % self.id
-
-#User
-#------------------
 from werkzeug.security import generate_password_hash, check_password_hash
+
+# -------- User--------------------------
+"""
+Class User:
+    id int
+    email str
+    password str
+    created_at datetime
+"""
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
 
     def save(self):
         db.session.add(self)
@@ -90,11 +27,125 @@ class User(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def hash_password(self, password):
-        self.password = generate_password_hash(password)
-
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r>' % self.email
+
+
+# --------Cours--------------------------
+"""
+Class Cours:
+    id int
+    int_cours str(25)
+    volume int
+"""
+
+
+class Cours(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    int_cours = db.Column(db.String(25),
+                          nullable=False)
+    volume = db.Column(db.Integer, nullable=False)
+    prestations = db.relationship('Prestation', backref='cours')
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def remove(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def __repr__(self):
+        return f'<Cours {self.int_cours} VH:{self.volume}>'
+
+
+# --------Enseignant---------------------
+"""
+Class Enseignant:
+    id int
+    noms str(75)
+    grade str
+    telephone str(10)
+"""
+
+
+class Enseignant(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    noms = db.Column(db.String(75), nullable=False)
+    grade = db.Column(db.String(15), nullable=False)
+    telephone = db.Column(db.String(10),
+                          nullable=False, unique=True)
+    prestations = db.relationship(
+        'Prestation', backref='enseignant')  # 1 to many
+    # backref : nom de la colonne parent au niveau de l'enfant (enf : Prestation).
+    # l'enfant pourrait manipuler le parent à l'aide de backref
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def remove(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def __repr__(self):
+        return f'<Ens : {self.noms} Grade : {self.grade}>'
+
+
+# ------Prestation----------------
+"""
+Class Prestation:
+    id int
+    datePrestation date
+    heureDebut time
+    heureFin time
+"""
+
+
+class Prestation(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    datePrestation = db.Column(db.Date, server_default=func.now())
+    heureDebut = db.Column(db.String(10), nullable=False)
+    heureFin = db.Column(db.String(10), nullable=False)
+    enseignant_id = db.Column(db.Integer, db.ForeignKey(
+        'enseignant.id'), nullable=False)  # child
+    cours_id = db.Column(db.Integer, db.ForeignKey(
+        'cours.id'), nullable=False)  # child
+    paiements = db.relationship('Paiement', backref='prestation')  # parent
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def remove(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def __repr__(self):
+        return f'<Prestation : {self.datePrestation}>'
+
+
+# -----Paiement---------------------
+"""
+Class Paiement :
+    id int
+    datePaiement date
+"""
+
+
+class Paiement (db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    datePaiement = db.Column(db.Date, server_default=func.now())
+    prestation_id = db.Column(db.Integer, db.ForeignKey(
+        'prestation.id'), unique=True, nullable=False)  # child
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def remove(self):
+        db.session.delete(self)
+        db.session.commit()

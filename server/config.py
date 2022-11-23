@@ -4,8 +4,7 @@ import os
 class Config:
     """Base config."""
     SECRET_KEY = 'Pinto Katende Jonathan secret'
-    MAX_CONTENT_LENGTH = 1*1024*1024 #1MB
-    UPLOAD_PATH = "/projet/produit_/images_produits"
+    
     
 class ProdConfig(Config):
     FLASK_ENV = 'production'
